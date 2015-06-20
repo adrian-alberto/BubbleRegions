@@ -1,13 +1,13 @@
 Blob = class()
 Blobs = List.new()
 
-function Blob:init(pos, volume, id)
+function Blob:init(pos, area, id)
 	local numVertices = 128
 	self.id = id
 	self.pos = pos
 	self.velocity = Vector2.new()
-	self.volume = volume
-	self.radius = math.sqrt(volume/math.pi) * 10
+	self.area = area
+	self.radius = math.sqrt(area/math.pi) * 10
 	self.vertices = {}
 	self.tweenedVertices = {}
 	self.controlVec = Vector2.new()
@@ -33,7 +33,7 @@ function Blob:update(dt)
 				local squishDist = ((distance*distance - other.radius*other.radius + self.radius*self.radius) / (2*distance))
 				if distance < (distance - squishDist) then
 					Blobs:removeValue(self)
-					other:setVolume(other.volume + self.volume)
+					other:setArea(other.area + self.area)
 					return
 				end
 			elseif other.radius * 1.2 > self.radius then
@@ -45,18 +45,19 @@ function Blob:update(dt)
 
 	--Phyics
 	force = force + self.velocity * -(self.radius*2*math.pi)/20 --friction
-	self.velocity = self.velocity + (force / (self.volume*10))
+	self.velocity = self.velocity + (force / (self.area*10))
 	self.pos = self.pos + self.velocity * dt
 
 	self:deformShape()
 end
 
 function Blob:draw(offset)
-	love.graphics.setColor(self.volume/2, self.volume/2, self.volume/2,150)
+	local color = math.min(200, self.realArea/80) + 55
+	love.graphics.setColor(color/2, color, color,255)
 	local poly = {}
-	for i = 1, #self.tweenedVertices do
-		local theta = math.pi*2*i/#self.tweenedVertices
-		local distance = self.tweenedVertices[i]
+	for i = 1, #self.vertices do
+		local theta = math.pi*2*i/#self.vertices
+		local distance = self.vertices[i]
 
 		--[[Smooth out blob shape
 		local avgsum = 0
@@ -79,26 +80,28 @@ function Blob:draw(offset)
 		poly[2*i] = math.sin(theta) * distance + self.pos.y + offset.y
 	end
 	love.graphics.polygon("fill", poly)
-	love.graphics.setColor(255,255,255,255)
+	love.graphics.setColor(0,0,0,255)
 	love.graphics.setLineWidth(2)
 	love.graphics.polygon("line", poly)
 
 	love.graphics.setColor(255,0,0,250)
 	--love.graphics.circle("line", self.pos.x + offset.x, self.pos.y + offset.y, self.radius)
+end
 
+function Blob:drawPrev(offset)
 	if self.prev then
-		--love.graphics.line(self.pos.x + offset.x, self.pos.y + offset.y, self.prev.pos.x + offset.x, self.prev.pos.y + offset.y)
+		love.graphics.line(self.pos.x + offset.x, self.pos.y + offset.y, self.prev.pos.x + offset.x, self.prev.pos.y + offset.y)
 	end
 end
 
-function Blob:setVolume(volume)
-	self.volume = volume
-	self.radius = math.sqrt(volume/math.pi) * 10
+function Blob:setArea(area)
+	self.area = area
+	self.radius = math.sqrt(area/math.pi) * 10
 end
 
 function Blob:setRadius(radius)
 	self.radius = radius
-	self.volume = math.pi*self.radius*self.radius
+	self.area = math.pi*self.radius*self.radius
 end
 
 
@@ -155,9 +158,13 @@ function Blob:deformShape()
 		end
 	end
 
-	--Tween blob for drawing (Rewrite later?)
-	for i, d in pairs(self.vertices) do
-		self.tweenedVertices[i] = math.min(d, (self.tweenedVertices[i]*20 + d)/21)
+	--Calculate real area
+	local area = 0
+	local x = 0.5 * math.sin(math.pi*2/#self.vertices)
+	for i = 1, #self.vertices - 1 do
+		local j = i + 1
+		area = area + x * self.vertices[i] * self.vertices[j]
 	end
+	self.realArea = area
 end
 
