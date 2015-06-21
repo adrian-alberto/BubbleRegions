@@ -5,7 +5,7 @@ function love.load()
 	require "tilemaps"
 	print("Hello, world!")
 
-	InitialBlob = Blob.new(Vector2.new(0,0), 40)
+	InitialBlob = Blob.new(Vector2.new(0,0), 70)
 	math.randomseed(love.timer.getTime())
 	repeat
 		local totalArea = 0
@@ -14,8 +14,8 @@ function love.load()
 			blobA = Blobs:get()[i]
 
 			local angle = math.random() * math.pi * 2
-			local dist1 = math.random(blobA.radius*0.3, blobA.radius*0.8) --do not change the 0.3
-			local dist2 = math.random(blobA.radius*0.5, blobA.radius*1.4)
+			local dist1 = math.random(blobA.radius*0.7, blobA.radius*0.9)
+			local dist2 = math.random(blobA.radius*0.1, blobA.radius*1.5)
 			local pos2 = Vector2.new(math.cos(angle)*(dist1+dist2), math.sin(angle)*(dist1+dist2)) + blobA.pos
 
 			blobB = Blob.new(pos2, 1)
@@ -30,12 +30,12 @@ function love.load()
 			totalArea = totalArea + blob.realArea
 			blob:dither()
 		end
-	until totalArea > 400^2
+	until totalArea > 600^2
 
 	maps = {}
 
 	for i, blob in pairs(Blobs:get()) do
-		table.insert(maps, TileMap.fromBlob(blob, 3))
+		table.insert(maps, TileMap.fromBlob(blob, 4))
 	end
 end
 
@@ -43,9 +43,11 @@ end
 function love.draw()
 	love.graphics.print("Hello, world", 10, 10)
 
-	love.graphics.setColor(255,255,255,255)
+	love.graphics.setColor(100,255,255,255)
 	for _, map in pairs(maps) do
-		map:draw(Vector2.new(love.window.getWidth()/2, love.window.getHeight()/2), 3)
+		local alpha = map.blob.realArea/70
+		love.graphics.setColor(alpha,255-alpha,200,255)
+		map:draw(Vector2.new(love.window.getWidth()/2, love.window.getHeight()/2), 4)
 	end
 
 	for _, blob in pairs(Blobs:get()) do

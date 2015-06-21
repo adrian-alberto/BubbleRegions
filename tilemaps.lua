@@ -53,12 +53,12 @@ end
 
 function TileMap:draw(offset, upscaleFactor)
 	love.graphics.setLineWidth(1)
-	love.graphics.setColor(self.blob.color and self.blob.color/2 or 0, self.blob.color or 0, self.blob.color or 0, 150)
+	--love.graphics.setColor(self.blob.color and self.blob.color/2 or 0, self.blob.color or 0, self.blob.color or 0, 150)
 	--love.graphics.rectangle("line", self.offsetX*upscaleFactor + offset.x, self.offsetY*upscaleFactor + offset.y, self.width*upscaleFactor, self.height*upscaleFactor)
 
 	for x, col in pairs(self.map) do
 		for y, t in pairs(col) do
-			love.graphics.setPointSize(2)
+			love.graphics.setPointSize(1.5)
 			love.graphics.point(t.x * upscaleFactor + offset.x, t.y * upscaleFactor + offset.y)
 		end
 	end

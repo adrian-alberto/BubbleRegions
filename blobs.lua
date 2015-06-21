@@ -54,7 +54,7 @@ end
 function Blob:draw(offset)
 	local color = math.min(200, self.realArea/80) + 55
 	self.color = color
-	love.graphics.setColor(color/2, color, color,100)
+	love.graphics.setColor(255 - color, 255, color,100)
 	local poly = {}
 	for i = 1, #self.vertices do
 		local theta = math.pi*2*i/#self.vertices
@@ -82,10 +82,10 @@ function Blob:draw(offset)
 	end
 	--love.graphics.polygon("fill", poly)
 	--love.graphics.setColor(0,0,0,255)
-	love.graphics.setLineWidth(1)
-	love.graphics.polygon("line", poly)
+	love.graphics.setLineWidth(2)
+	--love.graphics.polygon("line", poly)
 
-	love.graphics.setColor(255,0,0,250)
+	--love.graphics.setColor(255,0,0,100)
 	--love.graphics.circle("line", self.pos.x + offset.x, self.pos.y + offset.y, self.radius)
 end
 
@@ -172,9 +172,11 @@ end
 function Blob:dither()
 	for i, d in pairs(self.vertices) do
 		if d > self.radius * 0.99 then
-			local max = d
-			local min = self.radius * 0.8
+			local max = d*0.8
+			local min = self.radius * 0.7
 			self.vertices[i] = max - (math.random() * (max - min))
+		else
+			self.vertices[i] = d + 4
 		end
 	end
 end
