@@ -2,7 +2,7 @@ Blob = class()
 Blobs = List.new()
 
 function Blob:init(pos, area, id)
-	local numVertices = 128
+	local numVertices = 32
 	self.id = id
 	self.pos = pos
 	self.velocity = Vector2.new()
@@ -53,7 +53,8 @@ end
 
 function Blob:draw(offset)
 	local color = math.min(200, self.realArea/80) + 55
-	love.graphics.setColor(color/2, color, color,255)
+	self.color = color
+	love.graphics.setColor(color/2, color, color,100)
 	local poly = {}
 	for i = 1, #self.vertices do
 		local theta = math.pi*2*i/#self.vertices
@@ -62,15 +63,15 @@ function Blob:draw(offset)
 		--[[Smooth out blob shape
 		local avgsum = 0
 		local avgcount = 0
-		local avgwidth = math.floor(#self.tweenedVertices * 0.1)
+		local avgwidth = math.floor(#self.vertices * 0.2)
 		for j = -avgwidth, avgwidth do
 			local k = j
 			if i + j < 1 then
-				k = j + #self.tweenedVertices
-			elseif i + j > #self.tweenedVertices then
-				k = j - #self.tweenedVertices
+				k = j + #self.vertices
+			elseif i + j > #self.vertices then
+				k = j - #self.vertices
 			end
-			avgsum = avgsum + self.tweenedVertices[i + k]*(avgwidth + 1 - math.abs(j))
+			avgsum = avgsum + self.vertices[i + k]*(avgwidth + 1 - math.abs(j))
 			avgcount = avgcount + (avgwidth + 1 - math.abs(j))
 		end
 		distance = math.min(distance, avgsum/avgcount)
@@ -79,9 +80,9 @@ function Blob:draw(offset)
 		poly[2*i - 1] = math.cos(theta) * distance + self.pos.x + offset.x
 		poly[2*i] = math.sin(theta) * distance + self.pos.y + offset.y
 	end
-	love.graphics.polygon("fill", poly)
-	love.graphics.setColor(0,0,0,255)
-	love.graphics.setLineWidth(2)
+	--love.graphics.polygon("fill", poly)
+	--love.graphics.setColor(0,0,0,255)
+	love.graphics.setLineWidth(1)
 	love.graphics.polygon("line", poly)
 
 	love.graphics.setColor(255,0,0,250)
@@ -168,3 +169,12 @@ function Blob:deformShape()
 	self.realArea = area
 end
 
+function Blob:dither()
+	for i, d in pairs(self.vertices) do
+		if d > self.radius * 0.99 then
+			local max = d
+			local min = self.radius * 0.8
+			self.vertices[i] = max - (math.random() * (max - min))
+		end
+	end
+end
