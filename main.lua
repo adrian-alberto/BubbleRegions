@@ -30,7 +30,7 @@ function love.load()
 			totalArea = totalArea + blob.realArea
 			blob:dither()
 		end
-	until totalArea > 600^2
+	until totalArea > 400^2
 
 	maps = {}
 
@@ -46,11 +46,11 @@ function love.draw()
 	love.graphics.setColor(100,255,255,255)
 	for _, map in pairs(maps) do
 		local alpha = map.blob.realArea/70
-		love.graphics.setColor(alpha,255-alpha,200,255)
+		love.graphics.setColor(alpha,255-alpha,200,100)
 		map:draw(Vector2.new(love.window.getWidth()/2, love.window.getHeight()/2), 4)
 	end
 
 	for _, blob in pairs(Blobs:get()) do
-		blob:draw(Vector2.new(love.window.getWidth()/2, love.window.getHeight()/2))
+		--blob:draw(Vector2.new(love.window.getWidth()/2, love.window.getHeight()/2))
 	end
 end

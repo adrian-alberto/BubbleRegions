@@ -2,7 +2,7 @@ Blob = class()
 Blobs = List.new()
 
 function Blob:init(pos, area, id)
-	local numVertices = 32
+	local numVertices = 16
 	self.id = id
 	self.pos = pos
 	self.velocity = Vector2.new()
@@ -52,38 +52,18 @@ function Blob:update(dt)
 end
 
 function Blob:draw(offset)
-	local color = math.min(200, self.realArea/80) + 55
-	self.color = color
-	love.graphics.setColor(255 - color, 255, color,100)
 	local poly = {}
 	for i = 1, #self.vertices do
 		local theta = math.pi*2*i/#self.vertices
 		local distance = self.vertices[i]
 
-		--[[Smooth out blob shape
-		local avgsum = 0
-		local avgcount = 0
-		local avgwidth = math.floor(#self.vertices * 0.2)
-		for j = -avgwidth, avgwidth do
-			local k = j
-			if i + j < 1 then
-				k = j + #self.vertices
-			elseif i + j > #self.vertices then
-				k = j - #self.vertices
-			end
-			avgsum = avgsum + self.vertices[i + k]*(avgwidth + 1 - math.abs(j))
-			avgcount = avgcount + (avgwidth + 1 - math.abs(j))
-		end
-		distance = math.min(distance, avgsum/avgcount)
-		--]]
-
 		poly[2*i - 1] = math.cos(theta) * distance + self.pos.x + offset.x
 		poly[2*i] = math.sin(theta) * distance + self.pos.y + offset.y
 	end
 	--love.graphics.polygon("fill", poly)
-	--love.graphics.setColor(0,0,0,255)
-	love.graphics.setLineWidth(2)
-	--love.graphics.polygon("line", poly)
+	love.graphics.setColor(255,255,255,50)
+	love.graphics.setLineWidth(1)
+	love.graphics.polygon("line", poly)
 
 	--love.graphics.setColor(255,0,0,100)
 	--love.graphics.circle("line", self.pos.x + offset.x, self.pos.y + offset.y, self.radius)
@@ -111,16 +91,14 @@ function Blob:checkIfBurst()
 		local distance = (other.pos - self.pos).magnitude
 		local minDist = other.radius + self.radius
 		if other ~= self and distance < minDist then
-			--if self.radius * 1.2 < other.radius then
-				local squishDist = ((distance*distance - other.radius*other.radius + self.radius*self.radius) / (2*distance))
-				if distance < (distance - squishDist) then
-					return true
-				end
-				local squishDist = ((distance*distance - self.radius*self.radius + other.radius*other.radius) / (2*distance))
-				if distance < (distance - squishDist) then
-					return true
-				end
-			--end
+			local squishDist = ((distance*distance - other.radius*other.radius + self.radius*self.radius) / (2*distance))
+			if distance < (distance - squishDist) then
+				return true
+			end
+			local squishDist = ((distance*distance - self.radius*self.radius + other.radius*other.radius) / (2*distance))
+			if distance < (distance - squishDist) then
+				return true
+			end
 		end
 	end
 end
@@ -143,7 +121,6 @@ function Blob:deformShape()
 				local directionOfSquish = math.atan2(other.pos.y - self.pos.y, other.pos.x - self.pos.x)
 
 				if distance > (distance - squishDist) then
-				--if self.radius > overlap/2 and other.radius > overlap/2 then
 					--Things get weird if trying to draw something that is practically engulfed by another blob.
 					for i, d in pairs(self.vertices) do
 						local theta = math.pi*2*i/#self.vertices
@@ -173,7 +150,7 @@ function Blob:dither()
 	for i, d in pairs(self.vertices) do
 		if d > self.radius * 0.99 then
 			local max = d*0.8
-			local min = self.radius * 0.7
+			local min = self.radius * 0.6
 			self.vertices[i] = max - (math.random() * (max - min))
 		else
 			self.vertices[i] = d + 4

@@ -42,8 +42,18 @@ function TileMap.fromBlob(blob, downscaleFactor)
 			local oy = y + offsetY - blob.pos.y/downscaleFactor
 			local oh = math.sqrt(ox^2 + oy^2)
 			local otheta = math.atan2(oy, ox) % (math.pi*2)
-			local nearestVertexIndex = math.max(1,math.min(#tile.blob.vertices, math.floor((otheta/(math.pi*2)) * #tile.blob.vertices + 0.5)))
-			if oh*downscaleFactor < tile.blob.vertices[nearestVertexIndex] then
+			local low = (math.floor((otheta/(math.pi*2)) * #tile.blob.vertices) - 1) % #tile.blob.vertices + 1
+			local high = (math.ceil((otheta/(math.pi*2)) * #tile.blob.vertices) - 1) % #tile.blob.vertices + 1
+			local d1 = math.abs(((otheta/(math.pi*2)) * #tile.blob.vertices) - low)
+			local d2 = math.abs(((otheta/(math.pi*2)) * #tile.blob.vertices) - high)
+			local max = 0
+			if d1 < d2 then
+				max = d1 * blob.vertices[high] + (1-d1)*blob.vertices[low]
+			else
+				max = d2 * blob.vertices[low] + (1-d2)*blob.vertices[high]
+			end
+
+			if oh*downscaleFactor < max then
 				tile:add(x, y)
 			end
 		end
@@ -52,7 +62,7 @@ function TileMap.fromBlob(blob, downscaleFactor)
 end
 
 function TileMap:draw(offset, upscaleFactor)
-	love.graphics.setLineWidth(1)
+	--love.graphics.setLineWidth(1)
 	--love.graphics.setColor(self.blob.color and self.blob.color/2 or 0, self.blob.color or 0, self.blob.color or 0, 150)
 	--love.graphics.rectangle("line", self.offsetX*upscaleFactor + offset.x, self.offsetY*upscaleFactor + offset.y, self.width*upscaleFactor, self.height*upscaleFactor)
 
