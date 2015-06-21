@@ -149,10 +149,12 @@ end
 function Blob:dither()
 	for i, d in pairs(self.vertices) do
 		if d > self.radius * 0.99 then
+			--This part is not squished into anything. We should make it interesting.
 			local max = d*0.8
 			local min = self.radius * 0.6
 			self.vertices[i] = max - (math.random() * (max - min))
 		else
+			--This part is squished into something. We should extend it for a solid overlap.
 			self.vertices[i] = d + 4
 		end
 	end

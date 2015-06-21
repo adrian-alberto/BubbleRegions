@@ -37,13 +37,17 @@ function love.load()
 	for i, blob in pairs(Blobs:get()) do
 		table.insert(maps, TileMap.fromBlob(blob, 4))
 	end
+
+	MAP = SuperMap.new()
+	for _, tmap in pairs(maps) do
+		MAP:addMap(tmap)
+	end
 end
 
 
 function love.draw()
 	love.graphics.print("Hello, world", 10, 10)
 
-	love.graphics.setColor(100,255,255,255)
 	for _, map in pairs(maps) do
 		local alpha = map.blob.realArea/70
 		love.graphics.setColor(alpha,255-alpha,200,100)

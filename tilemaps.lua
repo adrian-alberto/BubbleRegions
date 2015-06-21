@@ -1,3 +1,11 @@
+Tile = class()
+
+function Tile:init(x, y)
+	self.x = x
+	self.y = y
+end
+
+
 TileMap = class()
 
 function TileMap:init(width, height, offsetX, offsetY)
@@ -86,11 +94,41 @@ function TileMap:add(x, y)
 	return t
 end
 
+function TileMap:get(x, y)
+	if not self.map[x] then
+		return nil
+	else
+		return self.map[x][y]
+	end
+end
 
 
-Tile = class()
+SuperMap = class(TileMap)
 
-function Tile:init(x, y)
-	self.x = x
-	self.y = y
+function SuperMap:init()
+	TileMap.init(self, 0,0,0,0)
+	self.tilemaps = {}
+end
+
+function SuperMap:addMap(tilemap)
+	table.insert(self.tilemaps, tilemap)
+	for x, col in pairs(tilemap.map) do
+		for y, tile in pairs(col) do
+			--If a tile exists, replace current reference to the existing tile.
+			--Otherwise, add the current tile to the supermap and retain original reference.
+			if self:get(tile.x, tile.y) then
+				col[y] = nil
+			else
+				self:addTile(tile)
+			end
+		end
+	end
+end
+
+function SuperMap:addTile(tile)
+	if not self.map[tile.x] then
+		self.map[tile.x] = {}
+	end
+	self.map[tile.x][tile.y] = tile
+	return tile
 end
